@@ -1,1 +1,793 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Standard and Sensitive Ratings — Loyihalar</title>
+<meta name="description" content="Standard and Sensitive Ratings Reyting Agentligi loyihalari: reytinglar, renkinglar, so'rovnomalar va tahliliy dashboardlar.">
+<link rel="icon" href="https://raw.githubusercontent.com/sunattagayev-cloud/our_projects/files/logo_SNS.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+<style>
+/* ============ VARIABLES ============ */
+:root {
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --radius: 22px;
+  --ease: cubic-bezier(.22,.61,.36,1);
+}
+[data-theme="dark"] {
+  --bg: #070b16;
+  --bg2: #0d1326;
+  --text: #eef2ff;
+  --muted: #9aa5c4;
+  --card: rgba(255,255,255,0.055);
+  --card-hover: rgba(255,255,255,0.09);
+  --border: rgba(255,255,255,0.11);
+  --border-hover: rgba(99,179,255,0.55);
+  --accent: #4f8cff;
+  --accent2: #22d3ee;
+  --accent3: #a78bfa;
+  --glow: rgba(79,140,255,0.35);
+  --shadow: 0 20px 60px rgba(0,0,0,0.45);
+  --blob1: #2447c9; --blob2: #0ea5b7; --blob3: #6d3fd1;
+}
+[data-theme="light"] {
+  --bg: #eef3fb;
+  --bg2: #ffffff;
+  --text: #0e1630;
+  --muted: #58648a;
+  --card: rgba(255,255,255,0.6);
+  --card-hover: rgba(255,255,255,0.85);
+  --border: rgba(14,22,48,0.08);
+  --border-hover: rgba(37,99,235,0.45);
+  --accent: #2563eb;
+  --accent2: #0891b2;
+  --accent3: #7c3aed;
+  --glow: rgba(37,99,235,0.22);
+  --shadow: 0 20px 50px rgba(30,50,110,0.14);
+  --blob1: #93b4ff; --blob2: #8be9f5; --blob3: #c4b5fd;
+}
+
+/* ============ BASE ============ */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  transition: background .6s var(--ease), color .6s var(--ease);
+  -webkit-font-smoothing: antialiased;
+}
+a { color:inherit; text-decoration:none; }
+
+/* ============ BACKGROUND ============ */
+.bg {
+  position:fixed; inset:0; z-index:-2; overflow:hidden;
+  background: radial-gradient(1200px 800px at 80% -10%, var(--bg2), transparent 60%), var(--bg);
+  transition: background .6s var(--ease);
+}
+.blob {
+  position:absolute; border-radius:50%;
+  filter: blur(90px); opacity:.55; mix-blend-mode: screen;
+  animation: float 22s ease-in-out infinite alternate;
+}
+[data-theme="light"] .blob { mix-blend-mode: multiply; opacity:.5; }
+.blob.b1 { width:560px; height:560px; background:var(--blob1); top:-180px; left:-120px; }
+.blob.b2 { width:480px; height:480px; background:var(--blob2); bottom:-160px; right:-100px; animation-delay:-7s; animation-duration:26s; }
+.blob.b3 { width:420px; height:420px; background:var(--blob3); top:40%; left:55%; animation-delay:-14s; animation-duration:30s; }
+@keyframes float {
+  0%   { transform: translate(0,0) scale(1); }
+  50%  { transform: translate(60px,-40px) scale(1.12); }
+  100% { transform: translate(-40px,60px) scale(.95); }
+}
+.grid-lines {
+  position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at 50% 0%, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 0%, #000 20%, transparent 75%);
+  opacity:.6;
+}
+
+/* ============ LAYOUT ============ */
+.container { width:min(1240px, 92vw); margin:0 auto; }
+
+/* ============ TOPBAR ============ */
+.topbar {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:22px 0 0;
+  animation: fadeDown .8s var(--ease) both;
+}
+.brand { display:flex; align-items:center; gap:12px; font-weight:700; font-size:15px; letter-spacing:.3px; }
+.brand-dot { width:10px; height:10px; border-radius:50%; background:var(--accent2); box-shadow:0 0 16px var(--accent2); animation:pulse 2.4s infinite; }
+@keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:.5} }
+
+.controls { display:flex; gap:10px; align-items:center; }
+.pill {
+  display:flex; align-items:center; gap:4px; padding:5px;
+  background:var(--card); border:1px solid var(--border);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-radius:999px; transition: all .4s var(--ease);
+}
+.pill button {
+  border:0; background:transparent; color:var(--muted); font-family:inherit;
+  font-weight:600; font-size:13px; padding:7px 13px; border-radius:999px; cursor:pointer;
+  transition: all .3s var(--ease);
+}
+.pill button:hover { color:var(--text); }
+.pill button.active { background:var(--accent); color:#fff; box-shadow:0 6px 18px var(--glow); }
+.theme-btn {
+  width:42px; height:42px; border-radius:50%; display:grid; place-items:center;
+  background:var(--card); border:1px solid var(--border); color:var(--text); cursor:pointer;
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  transition: all .4s var(--ease); position:relative; overflow:hidden;
+}
+.theme-btn:hover { transform:rotate(25deg) scale(1.08); border-color:var(--border-hover); }
+.theme-btn svg { width:19px; height:19px; position:absolute; transition: all .5s var(--ease); }
+.theme-btn .sun  { opacity:0; transform:rotate(-90deg) scale(.4); }
+.theme-btn .moon { opacity:1; transform:rotate(0) scale(1); }
+[data-theme="light"] .theme-btn .sun  { opacity:1; transform:rotate(0) scale(1); }
+[data-theme="light"] .theme-btn .moon { opacity:0; transform:rotate(90deg) scale(.4); }
+
+/* ============ HERO ============ */
+.hero { text-align:center; padding:64px 0 48px; }
+.logo-wrap {
+  position:relative; width:150px; height:150px; margin:0 auto 28px;
+  display:grid; place-items:center;
+  animation: fadeUp .9s var(--ease) .1s both;
+}
+.logo-ring {
+  position:absolute; inset:0; border-radius:50%;
+  background: conic-gradient(from 0deg, var(--accent), var(--accent2), var(--accent3), var(--accent));
+  animation: spin 9s linear infinite;
+  filter: blur(1px);
+}
+.logo-ring::after {
+  content:''; position:absolute; inset:3px; border-radius:50%;
+  background: var(--bg); transition: background .6s var(--ease);
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.logo-inner {
+  position:relative; width:120px; height:120px; border-radius:50%;
+  background: var(--card); border:1px solid var(--border);
+  backdrop-filter: blur(16px); display:grid; place-items:center;
+  box-shadow: 0 0 60px var(--glow);
+  animation: breathe 4s ease-in-out infinite;
+}
+@keyframes breathe { 0%,100%{box-shadow:0 0 40px var(--glow)} 50%{box-shadow:0 0 80px var(--glow)} }
+.logo-inner img { width:84px; height:84px; object-fit:contain; display:block; }
+.logo-fallback {
+  display:none; font-weight:800; font-size:34px; letter-spacing:2px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.hero h1 {
+  font-size: clamp(30px, 4.6vw, 54px); font-weight:800; letter-spacing:-1.2px; line-height:1.1;
+  animation: fadeUp .9s var(--ease) .25s both;
+}
+.hero h1 span {
+  background: linear-gradient(120deg, var(--accent) 0%, var(--accent2) 50%, var(--accent3) 100%);
+  background-size:200% 200%;
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  animation: shimmer 6s ease infinite;
+}
+@keyframes shimmer { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+.hero .sub {
+  margin-top:10px; font-size:14px; letter-spacing:3px; text-transform:uppercase;
+  color:var(--muted); font-weight:600;
+  animation: fadeUp .9s var(--ease) .35s both;
+}
+.slogan {
+  margin:26px auto 0; max-width:720px; font-size: clamp(17px, 2vw, 22px);
+  color:var(--muted); line-height:1.55; font-weight:500;
+  animation: fadeUp .9s var(--ease) .45s both;
+}
+.slogan strong { color:var(--text); font-weight:700; }
+.typing { border-right:2px solid var(--accent2); padding-right:4px; animation: caret .9s step-end infinite; }
+@keyframes caret { 50% { border-color: transparent; } }
+
+/* stats */
+.stats {
+  display:flex; justify-content:center; gap:14px; flex-wrap:wrap; margin-top:34px;
+  animation: fadeUp .9s var(--ease) .55s both;
+}
+.stat {
+  padding:12px 22px; border-radius:16px; background:var(--card); border:1px solid var(--border);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  display:flex; flex-direction:column; align-items:center; min-width:130px;
+  transition: all .4s var(--ease);
+}
+.stat:hover { transform:translateY(-4px); border-color:var(--border-hover); }
+.stat b { font-size:26px; font-weight:800; color:var(--accent); line-height:1; }
+.stat small { font-size:12px; color:var(--muted); margin-top:5px; text-transform:uppercase; letter-spacing:1px; }
+
+/* ============ SECTION TITLES ============ */
+.section-title {
+  display:flex; align-items:center; gap:14px; margin:48px 0 22px;
+  font-size:13px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--muted);
+}
+.section-title::after { content:''; flex:1; height:1px; background:linear-gradient(90deg, var(--border), transparent); }
+.section-title .num { color:var(--accent); }
+
+/* ============ CARDS ============ */
+.grid {
+  display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:20px;
+}
+.card {
+  position:relative; padding:28px 26px 24px; border-radius:var(--radius);
+  background:var(--card); border:1px solid var(--border);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  display:flex; flex-direction:column; gap:14px; min-height:230px;
+  transition: transform .5s var(--ease), background .5s var(--ease), border-color .5s var(--ease), box-shadow .5s var(--ease);
+  transform-style: preserve-3d; will-change: transform;
+  opacity:0; transform: translateY(32px);
+  cursor:pointer; overflow:hidden;
+}
+.card.show { opacity:1; transform:translateY(0); transition: opacity .8s var(--ease), transform .8s var(--ease), background .5s, border-color .5s, box-shadow .5s; }
+.card::before {
+  content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background: radial-gradient(500px circle at var(--mx,50%) var(--my,50%), var(--glow), transparent 45%);
+  opacity:0; transition: opacity .5s var(--ease);
+}
+.card:hover::before { opacity:1; }
+.card:hover { background:var(--card-hover); border-color:var(--border-hover); box-shadow:var(--shadow); }
+.card-top { display:flex; justify-content:space-between; align-items:flex-start; }
+.icon {
+  width:54px; height:54px; border-radius:16px; display:grid; place-items:center;
+  background: linear-gradient(135deg, var(--c1), var(--c2));
+  color:#fff; box-shadow: 0 10px 24px -6px var(--c1);
+  transition: transform .5s var(--ease);
+}
+.card:hover .icon { transform: translateZ(30px) rotate(-6deg) scale(1.08); }
+.icon svg { width:26px; height:26px; }
+.badge {
+  font-size:11px; font-weight:700; letter-spacing:1.5px; color:var(--muted);
+  padding:5px 10px; border-radius:999px; border:1px solid var(--border); background:var(--bg2);
+  opacity:.9;
+}
+.card h3 { font-size:18.5px; font-weight:700; line-height:1.3; letter-spacing:-.2px; }
+.card p { font-size:14px; color:var(--muted); line-height:1.55; flex:1; }
+.card-link {
+  display:inline-flex; align-items:center; gap:8px; font-weight:600; font-size:14px; color:var(--accent);
+  margin-top:auto;
+}
+.card-link svg { width:18px; height:18px; transition: transform .4s var(--ease); }
+.card:hover .card-link svg { transform: translateX(6px); }
+.card .shine {
+  position:absolute; top:0; left:-120%; width:60%; height:100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.14), transparent);
+  transform: skewX(-20deg); pointer-events:none;
+}
+.card:hover .shine { animation: shine .9s var(--ease) forwards; }
+@keyframes shine { to { left:160%; } }
+
+/* multi-link card */
+.sub-links { display:flex; flex-direction:column; gap:8px; margin-top:4px; }
+.sub-link {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:11px 14px; border-radius:14px; border:1px solid var(--border);
+  background:var(--bg2); font-size:14px; font-weight:600;
+  transition: all .35s var(--ease);
+}
+.sub-link:hover { border-color:var(--accent); transform:translateX(6px); color:var(--accent); }
+.sub-link svg { width:16px; height:16px; }
+
+/* wide cards for about */
+.card.wide { grid-column: span 2; flex-direction:row; align-items:center; gap:26px; min-height:160px; }
+.card.wide .icon { width:64px; height:64px; border-radius:20px; flex-shrink:0; }
+.card.wide .body { display:flex; flex-direction:column; gap:8px; flex:1; }
+@media (max-width: 760px) { .card.wide { grid-column: span 1; flex-direction:column; align-items:flex-start; } }
+
+/* ============ FOOTER ============ */
+footer {
+  margin:70px 0 36px; padding-top:26px; border-top:1px solid var(--border);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:14px;
+  color:var(--muted); font-size:13px;
+}
+footer a { color:var(--accent); font-weight:600; }
+footer a:hover { text-decoration:underline; }
+
+/* ============ TRANSITION OVERLAY ============ */
+.overlay {
+  position:fixed; inset:0; z-index:9999; pointer-events:none; display:grid; place-items:center;
+}
+.overlay-circle {
+  position:absolute; width:20px; height:20px; border-radius:50%;
+  background: radial-gradient(circle, var(--accent2), var(--accent) 60%, var(--accent3));
+  transform: translate(-50%,-50%) scale(0);
+  left:var(--x,50%); top:var(--y,50%);
+}
+.overlay.active { pointer-events:all; }
+.overlay.active .overlay-circle { animation: expand .75s var(--ease) forwards; }
+@keyframes expand { to { transform: translate(-50%,-50%) scale(250); } }
+.overlay-text {
+  position:relative; color:#fff; font-weight:700; font-size:20px; letter-spacing:1px;
+  opacity:0; display:flex; align-items:center; gap:14px;
+}
+.overlay.active .overlay-text { animation: fadeIn .4s .35s both; }
+.loader { width:22px; height:22px; border:3px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; animation: spin 1s linear infinite; }
+
+/* ============ ANIMATIONS ============ */
+@keyframes fadeUp   { from{opacity:0; transform:translateY(26px)} to{opacity:1; transform:none} }
+@keyframes fadeDown { from{opacity:0; transform:translateY(-18px)} to{opacity:1; transform:none} }
+@keyframes fadeIn   { from{opacity:0} to{opacity:1} }
+
+/* ripple */
+.ripple { position:absolute; border-radius:50%; background:var(--glow); transform:scale(0); animation: ripple .7s var(--ease); pointer-events:none; }
+@keyframes ripple { to { transform: scale(4); opacity:0; } }
+
+/* back-to-top */
+.totop {
+  position:fixed; right:26px; bottom:26px; width:46px; height:46px; border-radius:50%;
+  background:var(--accent); color:#fff; display:grid; place-items:center; cursor:pointer; border:0;
+  box-shadow:0 10px 30px var(--glow); opacity:0; transform:translateY(20px); transition: all .4s var(--ease);
+}
+.totop.show { opacity:1; transform:none; }
+.totop:hover { transform:translateY(-4px) scale(1.05); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+@media (max-width: 600px) {
+  .hero { padding:44px 0 32px; }
+  .topbar { flex-direction:column; gap:14px; align-items:flex-start; }
+}
+/* ============ PDF MODAL ============ */
+.modal { position:fixed; inset:0; z-index:9000; display:none; align-items:center; justify-content:center; padding:20px; }
+.modal.open { display:flex; }
+.modal-backdrop { position:absolute; inset:0; background:rgba(4,7,18,.72); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); animation:fadeIn .4s both; }
+.modal-box {
+  position:relative; width:min(1200px,100%); height:100%; max-height:92vh;
+  border-radius:24px; background:var(--bg); border:1px solid var(--border); box-shadow:var(--shadow);
+  display:flex; flex-direction:column; overflow:hidden;
+  animation: modalIn .55s var(--ease) both;
+}
+@keyframes modalIn { from{opacity:0; transform:translateY(40px) scale(.96)} to{opacity:1; transform:none} }
+.modal-head {
+  display:flex; align-items:center; gap:8px; padding:12px 16px; flex-wrap:wrap;
+  border-bottom:1px solid var(--border); background:var(--card);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+}
+.modal-title { font-weight:700; font-size:15px; flex:1; display:flex; align-items:center; gap:10px; min-width:160px; }
+.modal-title .mini-icon { width:32px; height:32px; border-radius:10px; display:grid; place-items:center; background:linear-gradient(135deg,#ef4444,#f59e0b); color:#fff; flex-shrink:0; }
+.modal-title .mini-icon svg { width:16px; height:16px; }
+.modal-title span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tools { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.tool {
+  width:38px; height:38px; border-radius:12px; border:1px solid var(--border); background:transparent;
+  color:var(--text); display:grid; place-items:center; cursor:pointer; transition:all .3s var(--ease);
+}
+.tool:hover { background:var(--card-hover); border-color:var(--border-hover); transform:translateY(-2px); }
+.tool.danger:hover { background:#ef4444; border-color:#ef4444; color:#fff; }
+.tool svg { width:18px; height:18px; }
+.pager { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums; padding:0 6px; }
+.pager b { color:var(--text); }
+.modal-body { position:relative; flex:1; overflow:auto; padding:22px; scroll-behavior:smooth; }
+.pdf-pages { display:flex; flex-direction:column; align-items:center; gap:18px; }
+.pdf-page {
+  background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 14px 40px rgba(0,0,0,.35);
+  opacity:0; transform:translateY(18px); transition: opacity .6s var(--ease), transform .6s var(--ease);
+}
+.pdf-page.in { opacity:1; transform:none; }
+.pdf-page canvas { display:block; }
+.pdf-status { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; color:var(--muted); padding:80px 20px; text-align:center; font-size:15px; }
+.loader.big { width:44px; height:44px; border-width:4px; border-color:var(--border); border-top-color:var(--accent); }
+.btn {
+  display:inline-flex; align-items:center; gap:8px; padding:11px 20px; border-radius:999px;
+  background:var(--accent); color:#fff; font-weight:600; font-size:14px; box-shadow:0 8px 24px var(--glow);
+  transition:all .3s var(--ease);
+}
+.btn:hover { transform:translateY(-3px); }
+.card.show:hover { transition-duration:.2s; }
+@media (max-width:700px) {
+  .modal { padding:0; }
+  .modal-box { max-height:100vh; border-radius:0; border:0; }
+  .modal-body { padding:12px; }
+  .pager { display:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+</div>
+<div class="grid-lines"></div>
+
+<!-- Page transition overlay -->
+<div class="overlay" id="overlay">
+  <div class="overlay-circle" id="overlayCircle"></div>
+  <div class="overlay-text"><span class="loader"></span><span data-i18n="opening">Ochilmoqda...</span></div>
+</div>
+
+<div class="container">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="brand"><span class="brand-dot"></span> Standard and Sensitive Ratings</div>
+    <div class="controls">
+      <div class="pill" id="langPill">
+        <button data-lang="uz" class="active">UZ</button>
+        <button data-lang="ru">RU</button>
+        <button data-lang="en">EN</button>
+      </div>
+      <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="logo-wrap">
+      <div class="logo-ring"></div>
+      <div class="logo-inner">
+        <img src="https://raw.githubusercontent.com/sunattagayev-cloud/our_projects/files/logo_SNS.svg" alt="SNS Ratings logo"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">SNS</span>
+      </div>
+    </div>
+    <h1><span>Standard and Sensitive</span><br>Ratings</h1>
+    <div class="sub" data-i18n="agency">Reyting Agentligi</div>
+    <p class="slogan"><strong data-i18n="sloganStrong">Ishonch — raqamlarda.</strong> <span class="typing" id="typing"></span></p>
+
+    <div class="stats">
+      <div class="stat"><b data-count="7">0</b><small data-i18n="statProjects">Loyihalar</small></div>
+      <div class="stat"><b data-count="4">0</b><small data-i18n="statSectors">Sektorlar</small></div>
+      <div class="stat"><b data-count="100" data-suffix="%">0</b><small data-i18n="statOpen">Shaffoflik</small></div>
+    </div>
+  </section>
+
+  <!-- RATINGS -->
+  <div class="section-title"><span class="num">01</span><span data-i18n="secRatings">Reytinglar</span></div>
+  <div class="grid">
+
+    <a class="card" href="https://sunattagayev-cloud.github.io/Attractiveness-rating/" style="--c1:#4f8cff;--c2:#22d3ee">
+      <span class="shine"></span>
+      <div class="card-top">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></div>
+        <span class="badge" data-i18n="bRating">REYTING</span>
+      </div>
+      <h3 data-i18n="p1t">Qimmatbaho qog'ozlar jozibadorligi reytingi</h3>
+      <p data-i18n="p1d">Emitentlar qimmatli qog'ozlarining investitsion jozibadorligini baholash.</p>
+      <span class="card-link"><span data-i18n="open">Ochish</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+
+    <a class="card" href="https://sunattagayev-cloud.github.io/banks_call_center_ratings/" style="--c1:#10b981;--c2:#22d3ee">
+      <span class="shine"></span>
+      <div class="card-top">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></div>
+        <span class="badge" data-i18n="bRating">REYTING</span>
+      </div>
+      <h3 data-i18n="p2t">Tijorat banklari Call-Markazlari reytingi</h3>
+      <p data-i18n="p2d">Banklar aloqa markazlarining sifati, tezligi va mijozlarga xizmat ko'rsatish darajasi.</p>
+      <span class="card-link"><span data-i18n="open">Ochish</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+
+    <a class="card" href="https://sunattagayev-cloud.github.io/Bank-apps-rating/" style="--c1:#a78bfa;--c2:#4f8cff">
+      <span class="shine"></span>
+      <div class="card-top">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg></div>
+        <span class="badge" data-i18n="bRating">REYTING</span>
+      </div>
+      <h3 data-i18n="p3t">Tijorat banklari Mobil ilovalar reytingi</h3>
+      <p data-i18n="p3d">Bank mobil ilovalarining funksionalligi, qulayligi va foydalanuvchi baholari tahlili.</p>
+      <span class="card-link"><span data-i18n="open">Ochish</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+
+    <a class="card" href="https://sunattagayev-cloud.github.io/Payment-organization-apps-rating/" style="--c1:#f59e0b;--c2:#ef4444">
+      <span class="shine"></span>
+      <div class="card-top">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg></div>
+        <span class="badge" data-i18n="bRating">REYTING</span>
+      </div>
+      <h3 data-i18n="p4t">To'lov tashkilotlari Mobil ilovalar reytingi</h3>
+      <p data-i18n="p4d">To'lov tizimlari mobil ilovalarining qiyosiy tahlili va reytingi.</p>
+      <span class="card-link"><span data-i18n="open">Ochish</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+  </div>
+
+  <!-- ANALYTICS -->
+  <div class="section-title"><span class="num">02</span><span data-i18n="secAnalytics">Tahlil va tadqiqotlar</span></div>
+  <div class="grid">
+
+    <a class="card" href="https://sunattagayev-cloud.github.io/Ranking/" style="--c1:#06b6d4;--c2:#3b82f6">
+      <span class="shine"></span>
+      <div class="card-top">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 6h3a2 2 0 0 1-2 4M7 6H4a2 2 0 0 0 2 4"/></svg></div>
+        <span class="badge" data-i18n="bRanking">RENKING</span>
+      </div>
+      <h3 data-i18n="p5t">Tashkilotlar renkingi</h3>
+      <p data-i18n="p5d">Moliyaviy tashkilotlarning asosiy ko'rsatkichlar bo'yicha o'rinlari.</p>
+      <span class="card-link"><span data-i18n="open">Ochish</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+
+    <a class="card" href="https://sunattagayev-cloud.github.io/So-rovnomalar/" style="--c1:#ec4899;--c2:#a78bfa">
+      <span class="shine"></span>
+      <div class="card-top">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <span class="badge" data-i18n="bSurvey">SO'ROVNOMA</span>
+      </div>
+      <h3 data-i18n="p6t">Mijozlar so'rovnomalari natijalari</h3>
+      <p data-i18n="p6d">Tashkilotlar mijozlari orasida o'tkazilgan so'rovnomalar natijalari va xulosalar.</p>
+      <span class="card-link"><span data-i18n="open">Ochish</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+
+    <div class="card" style="--c1:#8b5cf6;--c2:#ec4899" data-nolink>
+      <span class="shine"></span>
+      <div class="card-top">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></div>
+        <span class="badge" data-i18n="bStats">STATISTIKA</span>
+      </div>
+      <h3 data-i18n="p7t">Ijtimoiy tarmoqlar statistikasi</h3>
+      <p data-i18n="p7d">Tashkilotlarning ijtimoiy tarmoqlardagi kanallari faolligi tahlili.</p>
+      <div class="sub-links">
+        <a class="sub-link" href="https://sunattagayev-cloud.github.io/banks_soc_net/"><span data-i18n="p7a">Tijorat banklari</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="sub-link" href="https://sunattagayev-cloud.github.io/ins_comp_soc_net/"><span data-i18n="p7b">Sug'urta kompaniyalari</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <div class="section-title"><span class="num">03</span><span data-i18n="secAbout">Biz haqimizda</span></div>
+  <div class="grid">
+
+    <div class="card wide" data-pdf style="--c1:#ef4444;--c2:#f59e0b">
+      <span class="shine"></span>
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></div>
+      <div class="body">
+        <h3 data-i18n="p8t">Agentlik prezentatsiyasi</h3>
+        <p data-i18n="p8d">Faoliyatimiz, metodologiya va xizmatlar haqida to'liq taqdimot.</p>
+        <span class="card-link"><span data-i18n="view">Ko'rish</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9z"/></svg></span>
+      </div>
+    </div>
+
+    <a class="card" href="https://snsratings.uz/" style="--c1:#2563eb;--c2:#06b6d4">
+      <span class="shine"></span>
+      <div class="card-top">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg></div>
+        <span class="badge">WEB</span>
+      </div>
+      <h3 data-i18n="p9t">Rasmiy veb-sayt</h3>
+      <p>snsratings.uz</p>
+      <span class="card-link"><span data-i18n="visit">Saytga o'tish</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+
+    <a class="card" href="https://t.me/snsratings" style="--c1:#229ED9;--c2:#4f8cff">
+      <span class="shine"></span>
+      <div class="card-top">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg></div>
+        <span class="badge">TELEGRAM</span>
+      </div>
+      <h3 data-i18n="p10t">Telegram kanali</h3>
+      <p>@snsratings</p>
+      <span class="card-link"><span data-i18n="subscribe">Obuna bo'lish</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+  </div>
+
+  <footer>
+    <span>© <span id="year"></span> Standard and Sensitive Ratings. <span data-i18n="rights">Barcha huquqlar himoyalangan.</span></span>
+    <span><a href="https://snsratings.uz/">snsratings.uz</a> · <a href="https://t.me/snsratings">t.me/snsratings</a></span>
+  </footer>
+</div>
+
+<div class="modal" id="pdfModal">
+  <div class="modal-backdrop" id="pdfBackdrop"></div>
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title">
+        <span class="mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
+        <span data-i18n="p8t">Agentlik prezentatsiyasi</span>
+      </div>
+      <div class="tools">
+        <div class="pager"><b id="pgCur">–</b>/<span id="pgTot">–</span></div>
+        <button class="tool" id="zoomOut" title="−"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
+        <button class="tool" id="zoomIn" title="+"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        <button class="tool" id="fsBtn" title="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+        <a class="tool" id="dlBtn" href="https://raw.githubusercontent.com/sunattagayev-cloud/our_projects/files/Standard%20and%20Sensetive%20Ratings.pdf" download title="Download"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M6 11l6 6 6-6M4 21h16"/></svg></a>
+        <button class="tool danger" id="closeBtn" title="Esc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
+    </div>
+    <div class="modal-body" id="pdfBody">
+      <div class="pdf-status" id="pdfStatus"><span class="loader big"></span><span data-i18n="loading">Yuklanmoqda...</span></div>
+      <div class="pdf-pages" id="pdfPages"></div>
+    </div>
+  </div>
+</div>
+
+<button class="totop" id="totop" aria-label="Yuqoriga">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+const PDF_URL = "https://raw.githubusercontent.com/sunattagayev-cloud/our_projects/files/Standard%20and%20Sensetive%20Ratings.pdf";
+
+/* ===== i18n ===== */
+const I18N = {
+ uz:{agency:"Reyting Agentligi",opening:"Ochilmoqda...",loading:"Yuklanmoqda...",view:"Ko'rish",pdfErr:"PDF yuklanmadi.",
+  sloganStrong:"Ishonch — raqamlarda.",typing:["Mustaqil baholash. Aniq tahlil. Shaffof natija.","Moliya bozorining ishonchli ko'zgusi.","Ma'lumotlar asosidagi to'g'ri qarorlar."],
+  statProjects:"Loyihalar",statSectors:"Sektorlar",statOpen:"Shaffoflik",secRatings:"Reytinglar",secAnalytics:"Tahlil va tadqiqotlar",secAbout:"Biz haqimizda",
+  bRating:"REYTING",bRanking:"RENKING",bSurvey:"SO'ROVNOMA",bStats:"STATISTIKA",open:"Ochish",download:"Yuklab olish",visit:"Saytga o'tish",subscribe:"Obuna bo'lish",
+  p1t:"Qimmatbaho qog'ozlar jozibadorligi reytingi",p1d:"Emitentlar qimmatli qog'ozlarining investitsion jozibadorligini baholash.",
+  p2t:"Tijorat banklari Call-Markazlari reytingi",p2d:"Banklar aloqa markazlarining sifati va xizmat ko'rsatish darajasi.",
+  p3t:"Tijorat banklari Mobil ilovalar reytingi",p3d:"Bank mobil ilovalarining funksionalligi va foydalanuvchi baholari tahlili.",
+  p4t:"To'lov tashkilotlari Mobil ilovalar reytingi",p4d:"To'lov tizimlari mobil ilovalarining qiyosiy tahlili.",
+  p5t:"Tashkilotlar renkingi",p5d:"Moliyaviy tashkilotlarning asosiy ko'rsatkichlar bo'yicha o'rinlari.",
+  p6t:"Mijozlar so'rovnomalari natijalari",p6d:"Tashkilotlar mijozlari orasida o'tkazilgan so'rovnomalar natijalari.",
+  p7t:"Ijtimoiy tarmoqlar statistikasi",p7d:"Tashkilotlarning ijtimoiy tarmoqlardagi kanallari faolligi tahlili.",p7a:"Tijorat banklari",p7b:"Sug'urta kompaniyalari",
+  p8t:"Agentlik prezentatsiyasi",p8d:"Faoliyatimiz, metodologiya va xizmatlar haqida to'liq taqdimot.",p9t:"Rasmiy veb-sayt",p10t:"Telegram kanali",rights:"Barcha huquqlar himoyalangan."},
+ ru:{agency:"Рейтинговое агентство",opening:"Открывается...",loading:"Загрузка...",view:"Смотреть",pdfErr:"PDF не загрузился.",
+  sloganStrong:"Доверие — в цифрах.",typing:["Независимая оценка. Точный анализ. Прозрачный результат.","Надёжное зеркало финансового рынка.","Верные решения на основе данных."],
+  statProjects:"Проектов",statSectors:"Сектора",statOpen:"Прозрачность",secRatings:"Рейтинги",secAnalytics:"Аналитика и исследования",secAbout:"О нас",
+  bRating:"РЕЙТИНГ",bRanking:"РЭНКИНГ",bSurvey:"ОПРОС",bStats:"СТАТИСТИКА",open:"Открыть",download:"Скачать",visit:"На сайт",subscribe:"Подписаться",
+  p1t:"Рейтинг привлекательности ценных бумаг",p1d:"Оценка инвестиционной привлекательности ценных бумаг эмитентов.",
+  p2t:"Рейтинг Call-центров банков",p2d:"Качество и уровень обслуживания контакт-центров банков.",
+  p3t:"Рейтинг мобильных приложений банков",p3d:"Функциональность и оценки пользователей банковских приложений.",
+  p4t:"Рейтинг приложений платёжных организаций",p4d:"Сравнительный анализ приложений платёжных систем.",
+  p5t:"Рэнкинг организаций",p5d:"Позиции финансовых организаций по ключевым показателям.",
+  p6t:"Результаты опросов клиентов",p6d:"Результаты опросов среди клиентов организаций.",
+  p7t:"Статистика соцсетей",p7d:"Анализ активности каналов организаций в социальных сетях.",p7a:"Коммерческие банки",p7b:"Страховые компании",
+  p8t:"Презентация агентства",p8d:"Полная презентация о деятельности, методологии и услугах.",p9t:"Официальный сайт",p10t:"Telegram-канал",rights:"Все права защищены."},
+ en:{agency:"Rating Agency",opening:"Opening...",loading:"Loading...",view:"View",pdfErr:"PDF failed to load.",
+  sloganStrong:"Trust — in numbers.",typing:["Independent assessment. Precise analysis. Transparent results.","A reliable mirror of the financial market.","Right decisions, driven by data."],
+  statProjects:"Projects",statSectors:"Sectors",statOpen:"Transparency",secRatings:"Ratings",secAnalytics:"Analytics & Research",secAbout:"About us",
+  bRating:"RATING",bRanking:"RANKING",bSurvey:"SURVEY",bStats:"STATISTICS",open:"Open",download:"Download",visit:"Visit website",subscribe:"Subscribe",
+  p1t:"Securities Attractiveness Rating",p1d:"Assessment of the investment attractiveness of issuers' securities.",
+  p2t:"Banks' Call Center Rating",p2d:"Quality and service level of banks' contact centers.",
+  p3t:"Banks' Mobile Apps Rating",p3d:"Functionality and user ratings of banking mobile apps.",
+  p4t:"Payment Organizations' Apps Rating",p4d:"Comparative analysis of payment system mobile apps.",
+  p5t:"Organizations Ranking",p5d:"Positions of financial organizations by key indicators.",
+  p6t:"Customer Survey Results",p6d:"Results of surveys conducted among organizations' customers.",
+  p7t:"Social Media Statistics",p7d:"Activity analysis of organizations' social media channels.",p7a:"Commercial banks",p7b:"Insurance companies",
+  p8t:"Agency Presentation",p8d:"Full presentation on our activities, methodology and services.",p9t:"Official website",p10t:"Telegram channel",rights:"All rights reserved."}
+};
+let lang = localStorage.getItem('sns-lang') || 'uz';
+function applyLang(l){
+  lang = l; localStorage.setItem('sns-lang', l); document.documentElement.lang = l;
+  document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.dataset.i18n; if (I18N[l][k]) el.textContent = I18N[l][k]; });
+  document.querySelectorAll('#langPill button').forEach(b => b.classList.toggle('active', b.dataset.lang === l));
+  startTyping();
+}
+document.querySelectorAll('#langPill button').forEach(b => b.onclick = () => applyLang(b.dataset.lang));
+
+/* ===== Theme ===== */
+const root = document.documentElement;
+root.dataset.theme = localStorage.getItem('sns-theme') || 'dark';
+document.getElementById('themeBtn').onclick = () => {
+  root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('sns-theme', root.dataset.theme);
+};
+
+/* ===== Typing slogan ===== */
+let typeTimer, tIdx = 0;
+function startTyping(){
+  clearTimeout(typeTimer);
+  const el = document.getElementById('typing'), list = I18N[lang].typing;
+  let text = list[tIdx % list.length], i = 0; el.textContent = '';
+  (function type(){
+    if (i <= text.length) { el.textContent = text.slice(0, i++); typeTimer = setTimeout(type, 38); }
+    else typeTimer = setTimeout(() => { tIdx++; startTyping(); }, 3200);
+  })();
+}
+
+/* ===== Counters ===== */
+document.querySelectorAll('[data-count]').forEach(el => {
+  const target = +el.dataset.count, suf = el.dataset.suffix || ''; let start = null;
+  requestAnimationFrame(function step(ts){
+    if (!start) start = ts; const p = Math.min((ts - start) / 1600, 1);
+    el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))) + suf;
+    if (p < 1) requestAnimationFrame(step);
+  });
+});
+
+/* ===== Scroll reveal ===== */
+const io = new IntersectionObserver(es => es.forEach((e, i) => {
+  if (e.isIntersecting) { setTimeout(() => e.target.classList.add('show'), (e.target.dataset.i % 4) * 110); io.unobserve(e.target); }
+}), { threshold: .12 });
+document.querySelectorAll('.card').forEach((c, i) => { c.dataset.i = i; io.observe(c); });
+
+/* ===== 3D tilt + spotlight ===== */
+document.querySelectorAll('.card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    card.style.setProperty('--mx', x + 'px'); card.style.setProperty('--my', y + 'px');
+    if (!card.classList.contains('wide')) {
+      const rx = ((y / r.height) - .5) * -8, ry = ((x / r.width) - .5) * 8;
+      card.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-6px)`;
+    }
+  });
+  card.addEventListener('mouseleave', () => card.style.transform = '');
+});
+
+/* ===== Animated link transitions ===== */
+const overlay = document.getElementById('overlay'), circle = document.getElementById('overlayCircle');
+function ripple(el, e){
+  const r = document.createElement('span'); r.className = 'ripple';
+  const rect = el.getBoundingClientRect(), s = Math.max(rect.width, rect.height);
+  r.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX - rect.left - s/2}px;top:${e.clientY - rect.top - s/2}px`;
+  el.appendChild(r); setTimeout(() => r.remove(), 700);
+}
+document.querySelectorAll('a.card, a.sub-link').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault(); e.stopPropagation(); ripple(a, e);
+    circle.style.setProperty('--x', e.clientX + 'px'); circle.style.setProperty('--y', e.clientY + 'px');
+    overlay.classList.add('active');
+    setTimeout(() => { window.open(a.href, '_blank', 'noopener'); overlay.classList.remove('active'); }, 750);
+  });
+});
+
+/* ===== PDF viewer ===== */
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+const modal = document.getElementById('pdfModal'), pagesEl = document.getElementById('pdfPages'),
+      statusEl = document.getElementById('pdfStatus'), bodyEl = document.getElementById('pdfBody');
+let pdfDoc = null, scale = 1, rendering = false;
+
+async function loadPdf(){
+  if (pdfDoc) return;
+  try {
+    pdfDoc = await pdfjsLib.getDocument(PDF_URL).promise;
+    document.getElementById('pgTot').textContent = pdfDoc.numPages;
+    statusEl.style.display = 'none';
+    await renderAll();
+  } catch (err) {
+    statusEl.innerHTML = `<span>${I18N[lang].pdfErr}</span><a class="btn" href="${PDF_URL}" target="_blank">${I18N[lang].download}</a>`;
+  }
+}
+async function renderAll(){
+  if (rendering) return; rendering = true; pagesEl.innerHTML = '';
+  const maxW = Math.min(bodyEl.clientWidth - 44, 1000) * scale;
+  for (let n = 1; n <= pdfDoc.numPages; n++) {
+    const page = await pdfDoc.getPage(n);
+    const vp0 = page.getViewport({ scale: 1 }), s = maxW / vp0.width;
+    const vp = page.getViewport({ scale: s * (window.devicePixelRatio || 1) });
+    const wrap = document.createElement('div'); wrap.className = 'pdf-page'; wrap.dataset.page = n;
+    const canvas = document.createElement('canvas');
+    canvas.width = vp.width; canvas.height = vp.height;
+    canvas.style.width = maxW + 'px'; canvas.style.height = (vp0.height * s) + 'px';
+    wrap.appendChild(canvas); pagesEl.appendChild(wrap);
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+    requestAnimationFrame(() => wrap.classList.add('in'));
+  }
+  rendering = false;
+}
+bodyEl.addEventListener('scroll', () => {
+  const mid = bodyEl.scrollTop + bodyEl.clientHeight / 2;
+  document.querySelectorAll('.pdf-page').forEach(p => {
+    if (p.offsetTop <= mid && p.offsetTop + p.offsetHeight > mid) document.getElementById('pgCur').textContent = p.dataset.page;
+  });
+});
+function openPdf(){ modal.classList.add('open'); document.body.style.overflow = 'hidden'; loadPdf(); }
+function closePdf(){ modal.classList.remove('open'); document.body.style.overflow = ''; if (document.fullscreenElement) document.exitFullscreen(); }
+document.querySelector('[data-pdf]').addEventListener('click', e => { ripple(e.currentTarget, e); openPdf(); });
+document.getElementById('closeBtn').onclick = closePdf;
+document.getElementById('pdfBackdrop').onclick = closePdf;
+document.getElementById('zoomIn').onclick  = () => { if (pdfDoc && scale < 2)  { scale += .2; renderAll(); } };
+document.getElementById('zoomOut').onclick = () => { if (pdfDoc && scale > .6) { scale -= .2; renderAll(); } };
+document.getElementById('fsBtn').onclick = () => document.fullscreenElement ? document.exitFullscreen() : modal.requestFullscreen?.();
+document.addEventListener('keydown', e => {
+  if (!modal.classList.contains('open')) return;
+  if (e.key === 'Escape') closePdf();
+  if (e.key === 'ArrowRight' || e.key === 'PageDown') bodyEl.scrollBy({ top: bodyEl.clientHeight * .9 });
+  if (e.key === 'ArrowLeft'  || e.key === 'PageUp')   bodyEl.scrollBy({ top: -bodyEl.clientHeight * .9 });
+});
+let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => pdfDoc && modal.classList.contains('open') && renderAll(), 300); });
+
+/* ===== Misc ===== */
+const totop = document.getElementById('totop');
+window.addEventListener('scroll', () => totop.classList.toggle('show', scrollY > 400));
+totop.onclick = () => scrollTo({ top: 0, behavior: 'smooth' });
+document.getElementById('year').textContent = new Date().getFullYear();
+applyLang(lang);
+</script>
+</body>
+</html>
